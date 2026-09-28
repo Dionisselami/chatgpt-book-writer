@@ -1,0 +1,18 @@
+# ~/.codex/config.toml  (append this block)
+#
+# The key must exist in the environment of the process that launches Codex.
+# GUI-launched apps do NOT inherit your shell environment: set the variable,
+# then quit and reopen the app before the server will authenticate.
+
+[mcp_servers.proseify]
+url = "https://mcp.proseify.xyz/mcp"
+bearer_token_env_var = "PROSEIFY_API_KEY"
+enabled = true
+
+# If your build predates bearer_token_env_var, this equivalent form works:
+#
+# [mcp_servers.proseify]
+# url = "https://mcp.proseify.xyz/mcp"
+# enabled = true
+# [mcp_servers.proseify.http_headers]
+# Authorization = "Bearer sk-your-key-here"   # then keep this file out of git
