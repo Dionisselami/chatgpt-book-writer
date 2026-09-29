@@ -16,10 +16,36 @@ Two different things are called "ChatGPT", and only one of them can reach Prosei
 |---------|-----------------|-----|
 | **Codex CLI** (included with your ChatGPT plan) | Yes | Streamable HTTP MCP with a bearer token from an environment variable |
 | **ChatGPT desktop app**, where your plan exposes Codex-based MCP config | Yes | Same config file, same env-var token |
-| **ChatGPT web custom connectors** (developer mode) | No, not today | Custom connectors accept OAuth or no authentication only — ChatGPT will not present a static API key or custom header to an MCP server |
+| **ChatGPT web custom connectors** | **Yes, via sign-in** | Custom connectors accept OAuth or no authentication only — ChatGPT will never present a static API key. Proseify runs its own OAuth 2.1 authorization server, so the connector signs you in and holds a token instead of asking for a key |
 
-So this repo wires up the first two, and does not pretend the third works. If OpenAI adds
-header-based auth for web connectors, this file changes.
+All three connect. The CLI and desktop paths use a key from an environment variable; the web
+connector uses OAuth, which means **you can try Proseify in ChatGPT without buying anything** — a
+signed-in account with no plan runs at 30 requests/minute up to 5,000 requests a month, and a paid
+plan raises that ceiling. Two paths to the same server, same tools.
+
+## ChatGPT web connector (no key needed)
+
+If you would rather not deal with keys at all, the web connector reaches the same server:
+
+1. In ChatGPT: **Settings → Connectors → add a custom connector** (menu labels move around by plan
+   and rollout — you are looking for the entry that takes a URL, sometimes under "Advanced" or
+   developer mode).
+2. Name it `Proseify`, URL `https://mcp.proseify.xyz/mcp`. Leave authentication at its default:
+   the connector discovers what it needs from the server itself.
+3. ChatGPT opens a Proseify sign-in page (Google, GitHub, or an emailed link) and then a consent
+   screen listing what the connector may do. Approve it once.
+4. Ask for a book. `plan_book`, `search_corpus`, `get_style_references` and `evaluate_book` appear in
+   the tool list exactly as they do on the CLI path.
+
+How the sign-in works under the hood, if you want to verify it yourself: the server answers an
+unauthenticated request with `401` and a pointer to
+`https://mcp.proseify.xyz/.well-known/oauth-protected-resource`, which names the authorization server
+at `auth.proseify.xyz`. Tokens are bound to that endpoint, so a token minted for Proseify cannot be
+replayed against anyone else's server.
+
+**Free to try, paid to scale.** A signed-in account with no plan gets 30 requests/minute and 5,000
+requests/month; paid plans (`$19`–`$99/mo`) raise the rate ceiling and drop the monthly cap. Nothing
+is charged to connect.
 
 ## What Proseify actually is
 
@@ -42,7 +68,7 @@ its defaults would otherwise flatten to its own house style.
 
 ### 1. Get a Proseify key
 
-https://proseify.xyz — sign in, pick a plan (from $9/mo, or the one-time Founding Lifetime tier),
+https://proseify.xyz — sign in, pick a plan (from $19/mo, or the one-time Founding Lifetime tier),
 key issued on payment.
 
 ### 2. Put the key in your environment
@@ -185,10 +211,10 @@ not a scrape of titles.
 
 | Plan | Price | Rate limit |
 |------|-------|-----------|
-| Starter | $9/mo | 120 req/min |
-| Pro | $19/mo | 400 req/min |
-| Studio | $49/mo | 9999 req/min |
-| Founding Lifetime | one-time | 400 req/min, all genres |
+| Quill (Starter) | $19/mo | 120 req/min |
+| Fable (Pro) | $49/mo | 400 req/min |
+| Opus (Studio) | $99/mo | unlimited (fair use) |
+| Founding Lifetime | $149 one-time | 400 req/min, all genres |
 
 Sign in at https://proseify.xyz, pick a plan, and the key is issued the moment the purchase
 clears. Cancel from https://proseify.xyz/account; 14-day refund window
